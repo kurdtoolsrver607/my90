@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Gold Wallet | جزدان و دەخیلە</title>
+    <title>Gold Wallet Pro | جزدان و چات</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -14,94 +14,93 @@
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(250, 204, 21, 0.15); border-radius: 40px; }
         .gold-grad { background: linear-gradient(135deg, #facc15 0%, #854d0e 100%); color: #000; font-weight: 800; }
         .input-style { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(250, 204, 21, 0.2); padding: 18px; border-radius: 22px; width: 100%; outline: none; color: white; transition: 0.3s; }
-        .input-style:focus { border-color: #facc15; box-shadow: 0 0 15px rgba(250, 204, 21, 0.2); }
-        .tab-btn { transition: 0.4s; border-bottom: 2px solid transparent; }
-        .tab-active { color: #facc15; border-bottom-color: #facc15; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #facc15; border-radius: 10px; }
+        .chat-bubble { background: rgba(250, 204, 21, 0.1); border-radius: 20px; padding: 10px 15px; margin-bottom: 10px; max-width: 80%; }
+        .chat-mine { background: rgba(250, 204, 21, 0.2); margin-right: auto; margin-left: 0; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center pb-10">
 
-    <div class="w-full max-w-md flex justify-between p-6 text-[11px] font-bold opacity-50">
-        <div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> SYSTEM ONLINE</div>
-        <div id="live-clock">00:00:00</div>
+    <div class="w-full max-w-md p-6 space-y-4">
+        <div class="flex justify-between items-center text-[11px] font-bold opacity-50">
+            <div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> SYSTEM ONLINE</div>
+            <div id="live-clock">00:00:00</div>
+        </div>
+        <div class="glass-card p-4 grid grid-cols-2 gap-2 border-yellow-500/20 text-center">
+            <div><p class="text-[9px] opacity-50 uppercase">عەیار 21 هەولێر</p><p class="text-sm font-bold">495,000</p></div>
+            <div><p class="text-[9px] opacity-50 uppercase">عەیار 21 بەغداد</p><p class="text-sm font-bold text-yellow-500">492,500</p></div>
+        </div>
     </div>
 
-    <div id="auth-ui" class="w-full max-w-md mt-10 p-10 glass-card text-center mx-4">
-        <h1 class="text-4xl font-black mb-2 text-yellow-400">GOLD WALLET</h1>
-        <p class="text-[10px] tracking-widest opacity-40 mb-10 uppercase">Secure Multi-Storage System</p>
+    <div id="auth-ui" class="w-full max-w-md mt-4 p-10 glass-card text-center mx-4">
+        <h1 class="text-4xl font-black mb-10 text-yellow-400 uppercase tracking-tighter">Gold Wallet</h1>
         <div class="space-y-4">
             <input id="email" type="email" placeholder="ئیمێڵ" class="input-style">
             <input id="password" type="password" placeholder="پاسۆرد" class="input-style">
             <div id="signup-fields" class="hidden"><input id="display-name" type="text" placeholder="ناوی تەواو" class="input-style mt-4"></div>
-            <button onclick="handleAuth()" class="w-full gold-grad py-4 rounded-2xl shadow-xl mt-4 transition active:scale-95">بەردەوامبە</button>
-            <p onclick="toggleMode()" id="toggle-text" class="text-xs mt-6 opacity-50 cursor-pointer">هێشتا ئەکاونتت نییە؟ دروستی بکە</p>
+            <button onclick="handleAuth()" class="w-full gold-grad py-4 rounded-2xl shadow-xl mt-4">بەردەوامبە</button>
+            <p onclick="toggleMode()" id="toggle-text" class="text-xs mt-6 opacity-50 cursor-pointer underline">دروستکردنی ئەکاونت</p>
         </div>
     </div>
 
-    <div id="verify-notice" class="w-full max-w-md mt-16 p-10 glass-card text-center hidden mx-4">
-        <div class="text-5xl mb-6 animate-bounce">📧</div>
-        <h2 class="text-2xl font-black mb-4">پێویستت بە چالاککردنە</h2>
-        <p class="text-sm opacity-60 mb-8">تکایە جیمەیڵەکەت بپشکنە و لینکەکە چالاک بکە.</p>
-        <button onclick="location.reload()" class="w-full gold-grad py-4 rounded-2xl mb-3">چالاکم کرد</button>
-        <button onclick="auth.signOut().then(()=>location.reload())" class="text-xs opacity-40">بە ئیمێڵێکی تر بچۆ ژوورەوە</button>
-    </div>
-
-    <div id="main-ui" class="w-full max-w-md hidden px-4">
+    <div id="main-ui" class="w-full max-w-md hidden px-4 mt-4">
         
-        <div class="space-y-4 mb-8">
-            <div class="glass-card p-8 relative overflow-hidden border-yellow-500/40">
-                <div class="absolute -top-10 -left-10 w-32 h-32 bg-yellow-500/10 blur-[50px]"></div>
-                <div class="flex justify-between items-start mb-4">
-                    <span class="text-[10px] font-bold opacity-50 tracking-widest uppercase">ڕۆژانە / Wallet</span>
-                    <span class="text-xl">💳</span>
-                </div>
-                <h1 id="bal-wallet" class="text-4xl font-black mb-1">0 <span class="text-xs font-normal opacity-30">IQD</span></h1>
-                <p id="usd-wallet" class="text-sm font-mono opacity-50">$0.00</p>
-            </div>
+        <div class="relative mb-6">
+            <input id="user-search" oninput="searchUsers(this.value)" type="text" placeholder="بگەڕێ بۆ ناوی هاوڕێکانت..." class="input-style pr-12">
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xl">🔍</span>
+            <div id="search-results" class="absolute w-full mt-2 z-10 hidden bg-[#0a0a0a] border border-yellow-500/20 rounded-2xl p-2"></div>
+        </div>
 
-            <div class="glass-card p-8 relative overflow-hidden border-blue-500/20 bg-blue-500/5">
-                <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-500/10 blur-[50px]"></div>
-                <div class="flex justify-between items-start mb-4">
-                    <span class="text-[10px] font-bold opacity-50 tracking-widest uppercase">دەخیلە / Vault</span>
-                    <span class="text-xl">🔐</span>
-                </div>
-                <h1 id="bal-vault" class="text-4xl font-black mb-1 text-blue-400">0 <span class="text-xs font-normal opacity-30 text-white">IQD</span></h1>
-                <p id="usd-vault" class="text-sm font-mono opacity-50">$0.00</p>
+        <div class="space-y-4 mb-8">
+            <div class="glass-card p-8 border-yellow-500/40">
+                <p class="text-[10px] font-bold opacity-50 uppercase">ڕۆژانە / Wallet</p>
+                <h1 id="bal-wallet" class="text-4xl font-black my-2">0</h1>
+                <p id="usd-wallet" class="text-sm opacity-50 font-mono">$0.00</p>
+            </div>
+            <div class="glass-card p-8 border-blue-500/20 bg-blue-500/5">
+                <p class="text-[10px] font-bold opacity-50 uppercase text-blue-400">دەخیلە / Vault</p>
+                <h1 id="bal-vault" class="text-4xl font-black my-2 text-blue-400">0</h1>
+                <p id="usd-vault" class="text-sm opacity-50 font-mono">$0.00</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-3 gap-3 mb-8">
-            <button onclick="openModal('income')" class="glass-card p-4 text-center hover:bg-yellow-500/10 transition">
-                <div class="text-xl mb-1">📥</div><div class="text-[9px] font-bold uppercase">داهات</div>
-            </button>
-            <button onclick="openModal('expense')" class="glass-card p-4 text-center hover:bg-red-500/10 transition">
-                <div class="text-xl mb-1 text-red-400">📤</div><div class="text-[9px] font-bold uppercase text-red-400">مەسرەف</div>
-            </button>
-            <button onclick="openModal('internal')" class="glass-card p-4 text-center hover:bg-blue-500/10 transition border-blue-500/30">
-                <div class="text-xl mb-1">🔄</div><div class="text-[9px] font-bold uppercase text-blue-400">گواستنەوە</div>
-            </button>
+        <div class="grid grid-cols-2 gap-3 mb-8 text-center text-[11px] font-bold">
+            <button onclick="openModal('income')" class="glass-card p-5">📥 داهات</button>
+            <button onclick="openModal('expense')" class="glass-card p-5 text-red-400">📤 مەسرەف</button>
+            <button onclick="openModal('internal')" class="glass-card p-5 col-span-2 text-blue-400">🔄 گواستنەوەی ناوخۆیی</button>
         </div>
 
         <div class="glass-card p-7 min-h-[400px]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-black text-sm uppercase tracking-tighter">سجلی هەموو جزدانەکان</h3>
-                <span onclick="copyMyID()" class="text-[9px] bg-yellow-400/10 px-3 py-1.5 rounded-full cursor-pointer font-bold">COPY ID</span>
-            </div>
-            <div id="history-list" class="space-y-4 max-h-[450px] overflow-y-auto pr-2"></div>
+            <h3 class="font-black text-sm uppercase mb-6 pb-2 border-b border-white/5">چالاکییەکان</h3>
+            <div id="history-list" class="space-y-4 max-h-[500px] overflow-y-auto"></div>
         </div>
 
-        <button onclick="auth.signOut().then(()=>location.reload())" class="w-full mt-10 text-[10px] opacity-20 hover:opacity-100 uppercase transition tracking-[0.3em]">Logout Securely</button>
+        <button onclick="auth.signOut().then(()=>location.reload())" class="w-full mt-10 text-[10px] opacity-20 uppercase">Logout</button>
+    </div>
+
+    <div id="chat-modal" class="fixed inset-0 bg-black/95 hidden items-end sm:items-center justify-center p-4 z-50 backdrop-blur-xl">
+        <div class="glass-card w-full max-w-sm h-[80vh] flex flex-col p-6 border-yellow-500/30">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-white/5">
+                <h2 id="chat-user-name" class="text-xl font-black text-yellow-400">چات</h2>
+                <button onclick="closeChat()" class="text-xs opacity-50">داخستن</button>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto mb-4 p-2"></div>
+            <div class="space-y-3">
+                <div class="flex gap-2">
+                    <input id="chat-msg-input" type="text" placeholder="نامەیەک بنووسە..." class="input-style !py-3">
+                    <button onclick="sendChatMessage()" class="gold-grad px-6 rounded-2xl">ناردن</button>
+                </div>
+                <button onclick="openTransferFromChat()" class="w-full py-3 bg-green-500/20 text-green-400 rounded-xl font-bold border border-green-500/30">💸 ناردنی پارە</button>
+            </div>
+        </div>
     </div>
 
     <div id="modal" class="fixed inset-0 bg-black/95 hidden items-center justify-center p-6 z-50 backdrop-blur-xl">
-        <div class="glass-card w-full max-w-sm p-8 shadow-2xl border-yellow-500/30">
-            <h2 id="m-title" class="text-2xl font-black mb-8 text-yellow-400 text-center uppercase"></h2>
+        <div class="glass-card w-full max-w-sm p-8 border-yellow-500/30 text-center">
+            <h2 id="m-title" class="text-2xl font-black mb-8 text-yellow-400"></h2>
             <div id="m-fields" class="space-y-5"></div>
             <div class="flex gap-4 mt-10">
                 <button onclick="closeModal()" class="flex-1 opacity-40 font-bold">لابردن</button>
-                <button id="m-confirm" class="flex-[2] gold-grad py-4 rounded-2xl shadow-lg">تۆمارکردن</button>
+                <button id="m-confirm" class="flex-[2] gold-grad py-4 rounded-2xl">تۆمارکردن</button>
             </div>
         </div>
     </div>
@@ -118,144 +117,173 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
-        let authMode = 'login';
+        let currentChatUser = null;
 
-        // Live Clock
         setInterval(() => { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('en-GB'); }, 1000);
 
-        // Auth Functions
         function toggleMode() {
-            authMode = authMode === 'login' ? 'signup' : 'login';
-            document.getElementById('signup-fields').classList.toggle('hidden', authMode === 'login');
-            document.getElementById('toggle-text').innerText = authMode === 'login' ? 'هێشتا ئەکاونتت نییە؟ دروستی بکە' : 'ئەکاونتم هەیە؟ بچۆ ژوورەوە';
+            const mode = document.getElementById('signup-fields').classList.toggle('hidden');
+            document.getElementById('toggle-text').innerText = mode ? 'دروستکردنی ئەکاونت' : 'بچۆ ژوورەوە';
         }
 
         async function handleAuth() {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
             try {
-                if (authMode === 'signup') {
+                if (!document.getElementById('signup-fields').classList.contains('hidden')) {
                     const res = await auth.createUserWithEmailAndPassword(email, pass);
-                    await res.user.sendEmailVerification();
-                    await db.ref('users/' + res.user.uid).set({ name: document.getElementById('display-name').value, wallet: 0, vault: 0, email: email });
-                    alert("نامەی چالاککردن نێردرا!");
+                    await db.ref('users/' + res.user.uid).set({ 
+                        name: document.getElementById('display-name').value.trim().toLowerCase(), 
+                        fullName: document.getElementById('display-name').value,
+                        wallet: 0, vault: 0, email: email 
+                    });
                 } else { await auth.signInWithEmailAndPassword(email, pass); }
             } catch (e) { alert(e.message); }
         }
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                if (!user.emailVerified) {
-                    document.getElementById('auth-ui').classList.add('hidden');
-                    document.getElementById('verify-notice').classList.remove('hidden');
-                } else {
-                    document.getElementById('auth-ui').classList.add('hidden');
-                    document.getElementById('verify-notice').classList.add('hidden');
-                    document.getElementById('main-ui').classList.remove('hidden');
-                    loadDashboard(user.uid);
-                }
+                document.getElementById('auth-ui').classList.add('hidden');
+                document.getElementById('main-ui').classList.remove('hidden');
+                loadDashboard(user.uid);
             }
         });
 
-        // Core Dashboard Logic
+        // Search System
+        async function searchUsers(query) {
+            const resultsDiv = document.getElementById('search-results');
+            if (query.length < 2) { resultsDiv.classList.add('hidden'); return; }
+            
+            const snap = await db.ref('users').orderByChild('name').startAt(query.toLowerCase()).endAt(query.toLowerCase() + "\uf8ff").once('value');
+            resultsDiv.innerHTML = "";
+            if (snap.exists()) {
+                resultsDiv.classList.remove('hidden');
+                snap.forEach(child => {
+                    if (child.key !== auth.currentUser.uid) {
+                        resultsDiv.innerHTML += `<div onclick="startChat('${child.key}', '${child.val().fullName}')" class="p-3 hover:bg-white/5 cursor-pointer border-b border-white/5">${child.val().fullName}</div>`;
+                    }
+                });
+            }
+        }
+
+        function startChat(uid, name) {
+            currentChatUser = { uid, name };
+            document.getElementById('chat-modal').classList.remove('hidden');
+            document.getElementById('chat-user-name').innerText = name;
+            document.getElementById('search-results').classList.add('hidden');
+            loadChatMessages(uid);
+        }
+
+        function loadChatMessages(otherUid) {
+            const myUid = auth.currentUser.uid;
+            const chatID = myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
+            db.ref(`chats/${chatID}`).on('value', snap => {
+                const msgDiv = document.getElementById('chat-messages');
+                msgDiv.innerHTML = "";
+                snap.forEach(child => {
+                    const m = child.val();
+                    msgDiv.innerHTML += `<div class="chat-bubble ${m.sender === myUid ? 'chat-mine' : ''}">${m.text}</div>`;
+                });
+                msgDiv.scrollTop = msgDiv.scrollHeight;
+            });
+        }
+
+        async function sendChatMessage() {
+            const text = document.getElementById('chat-msg-input').value;
+            if (!text) return;
+            const myUid = auth.currentUser.uid;
+            const otherUid = currentChatUser.uid;
+            const chatID = myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
+            await db.ref(`chats/${chatID}`).push({ sender: myUid, text: text, time: Date.now() });
+            document.getElementById('chat-msg-input').value = "";
+        }
+
         function loadDashboard(uid) {
             db.ref('users/' + uid).on('value', snap => {
-                const data = snap.val() || { wallet: 0, vault: 0 };
-                const w = data.wallet || 0;
-                const v = data.vault || 0;
-                
-                document.getElementById('bal-wallet').innerHTML = w.toLocaleString() + ' <span class="text-xs opacity-20">IQD</span>';
-                document.getElementById('usd-wallet').innerText = "$" + (w / 1520).toFixed(2);
-                
-                document.getElementById('bal-vault').innerHTML = v.toLocaleString() + ' <span class="text-xs opacity-20">IQD</span>';
-                document.getElementById('usd-vault').innerText = "$" + (v / 1520).toFixed(2);
+                const data = snap.val();
+                document.getElementById('bal-wallet').innerText = (data.wallet || 0).toLocaleString() + " د.ع";
+                document.getElementById('usd-wallet').innerText = "$" + (data.wallet / 1520).toFixed(2);
+                document.getElementById('bal-vault').innerText = (data.vault || 0).toLocaleString() + " د.ع";
+                document.getElementById('usd-vault').innerText = "$" + (data.vault / 1520).toFixed(2);
             });
 
             db.ref('users/' + uid + '/history').orderByChild('time').on('value', snap => {
                 const list = document.getElementById('history-list');
                 list.innerHTML = "";
                 let entries = [];
-                snap.forEach(c => entries.push({key: c.key, ...c.val()}));
+                snap.forEach(c => entries.push(c.val()));
                 entries.reverse().forEach(tx => {
-                    const isWallet = tx.target === 'wallet';
+                    const isPlus = tx.amount > 0;
                     list.innerHTML += `
-                        <div class="flex justify-between items-center p-5 bg-white/[0.02] rounded-[25px] border-r-2 ${tx.amount > 0 ? 'border-green-500' : 'border-red-500'}">
+                        <div class="flex justify-between items-center p-5 bg-white/[0.02] rounded-[25px] border-r-2 ${isPlus ? 'border-green-500' : 'border-red-500'}">
                             <div>
                                 <p class="text-[13px] font-bold text-white/90">${tx.note}</p>
-                                <p class="text-[9px] opacity-30 mt-1 uppercase">${isWallet ? '💳 Wallet' : '🔐 Vault'} • ${new Date(tx.time).toLocaleTimeString()}</p>
+                                <p class="text-[9px] opacity-30">${tx.target} • ${new Date(tx.time).toLocaleTimeString()}</p>
                             </div>
-                            <p class="${tx.amount > 0 ? 'text-green-400' : 'text-red-400'} font-black text-sm">${tx.amount.toLocaleString()}</p>
+                            <div class="text-right">
+                                <p class="${isPlus ? 'text-green-400' : 'text-red-400'} font-black">${isPlus ? '+' : ''}${tx.amount.toLocaleString()}</p>
+                            </div>
                         </div>`;
                 });
             });
         }
 
-        // Transactions
+        async function transferMoney(amount) {
+            const amt = Math.abs(parseInt(amount));
+            const myUid = auth.currentUser.uid;
+            const otherUid = currentChatUser.uid;
+            
+            // Get my name
+            const mySnap = await db.ref('users/' + myUid).get();
+            const myName = mySnap.val().fullName;
+
+            // Update Receiver
+            await db.ref(`users/${otherUid}/wallet`).transaction(b => (b || 0) + amt);
+            await db.ref(`users/${otherUid}/history`).push({ note: `پارە لەلایەن: ${myName}`, amount: amt, target: 'wallet', time: Date.now() });
+
+            // Update Sender
+            await db.ref(`users/${myUid}/wallet`).transaction(b => (b || 0) - amt);
+            await db.ref(`users/${myUid}/history`).push({ note: `ناردنی پارە بۆ: ${currentChatUser.name}`, amount: -amt, target: 'wallet', time: Date.now() });
+
+            // Log to Chat
+            const chatID = myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
+            await db.ref(`chats/${chatID}`).push({ sender: myUid, text: `💸 من بڕی ${amt.toLocaleString()} دینارم نارد!`, time: Date.now() });
+            
+            alert("پارەکە بە سەرکەوتوویی نێردرا ✅");
+            closeModal();
+        }
+
+        // Internal Functions
         async function processEntry(type, amount, note, target) {
-            const amt = parseInt(amount);
-            if (isNaN(amt) || !note) return alert("خانەکان پڕبکەرەوە");
-            
-            const uid = auth.currentUser.uid;
-            const finalAmt = type === 'income' ? amt : -amt;
-
-            // Update specific balance
-            await db.ref(`users/${uid}/${target}`).transaction(b => (b || 0) + finalAmt);
-            // Save to shared history
-            await db.ref(`users/${uid}/history`).push({ note: note, amount: finalAmt, target: target, time: Date.now() });
+            const finalAmt = type === 'income' ? Math.abs(amount) : -Math.abs(amount);
+            await db.ref(`users/${auth.currentUser.uid}/${target}`).transaction(b => (b || 0) + finalAmt);
+            await db.ref(`users/${auth.currentUser.uid}/history`).push({ note: note, amount: finalAmt, target: target, time: Date.now() });
             closeModal();
         }
 
-        async function internalTransfer(amt) {
-            const amount = parseInt(amt);
-            const uid = auth.currentUser.uid;
-            
-            // Check Vault balance
-            const snap = await db.ref(`users/${uid}/vault`).get();
-            if ((snap.val() || 0) < amount) return alert("پارەی پێویست لە دەخیلەدا نییە!");
-
-            // Move from Vault to Wallet
-            await db.ref(`users/${uid}/vault`).transaction(b => (b || 0) - amount);
-            await db.ref(`users/${uid}/wallet`).transaction(b => (b || 0) + amount);
-            
-            await db.ref(`users/${uid}/history`).push({ note: "گواستنەوە بۆ جزدان 🔄", amount: amount, target: 'wallet', time: Date.now() });
-            await db.ref(`users/${uid}/history`).push({ note: "گواستنەوە لە دەخیلە 🔄", amount: -amount, target: 'vault', time: Date.now() });
-            
-            closeModal();
-        }
-
-        // Modal Controls
         function openModal(mode) {
             const m = document.getElementById('modal');
             const f = document.getElementById('m-fields');
             const btn = document.getElementById('m-confirm');
             m.style.display = 'flex';
-
-            if (mode === 'internal') {
-                document.getElementById('m-title').innerText = "گواستنەوە بۆ جزدان";
-                f.innerHTML = `<p class="text-[10px] text-center opacity-50">پارە لە دەخیلەکەتەوە بنێرە بۆ جزدانی خەرجی</p>
-                               <input id="v-amt" type="number" placeholder="بڕی پارە" class="input-style">`;
-                btn.onclick = () => internalTransfer(document.getElementById('v-amt').value);
-            } else {
-                document.getElementById('m-title').innerText = mode === 'income' ? "زیادکردنی داهات" : "تۆمارکردنی مەسرەف";
-                f.innerHTML = `
-                    <select id="v-target" class="input-style mb-4 text-black">
-                        <option value="wallet">بۆ جزدانی ڕۆژانە 💳</option>
-                        <option value="vault">بۆ ناو دەخیلە 🔐</option>
-                    </select>
-                    <input id="v-note" placeholder="بۆچی؟" class="input-style mb-4">
-                    <input id="v-amt" type="number" placeholder="بڕی پارە" class="input-style">`;
-                
-                // If it's an expense, hide Vault from options (User said expense only from wallet)
-                if (mode === 'expense') {
-                    document.getElementById('v-target').innerHTML = '<option value="wallet">تەنها لە جزدانی ڕۆژانە 💳</option>';
-                }
-
+            if (mode === 'income' || mode === 'expense') {
+                document.getElementById('m-title').innerText = mode === 'income' ? "داهات" : "مەسرەف";
+                f.innerHTML = `<select id="v-target" class="input-style mb-4 text-black"><option value="wallet">Wallet 💳</option><option value="vault">Vault 🔐</option></select><input id="v-note" placeholder="بۆچی؟" class="input-style mb-4"><input id="v-amt" type="number" placeholder="بڕی پارە" class="input-style">`;
                 btn.onclick = () => processEntry(mode, document.getElementById('v-amt').value, document.getElementById('v-note').value, document.getElementById('v-target').value);
             }
         }
 
+        function openTransferFromChat() {
+            closeChat();
+            const m = document.getElementById('modal');
+            document.getElementById('m-title').innerText = "ناردنی پارە بۆ " + currentChatUser.name;
+            document.getElementById('m-fields').innerHTML = `<input id="t-amt" type="number" placeholder="بڕی پارە" class="input-style">`;
+            document.getElementById('m-confirm').onclick = () => transferMoney(document.getElementById('t-amt').value);
+            m.style.display = 'flex';
+        }
+
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function copyMyID() { navigator.clipboard.writeText(auth.currentUser.uid); alert("ID کۆپی کرا!"); }
+        function closeChat() { document.getElementById('chat-modal').classList.add('hidden'); }
     </script>
 </body>
 </html>
