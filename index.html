@@ -3,86 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallet Pro | جزدانی زیرەک</title>
+    <title>Dreamy Wallet Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;500;800&display=swap');
-        body { font-family: 'Vazirmatn', sans-serif; background: #0f172a; color: white; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        .btn-gradient { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
-        .input-style { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 15px; width: 100%; outline: none; color: white; }
+        body { font-family: 'Vazirmatn', sans-serif; background: #0a0a0a; color: #facc15; }
+        .dreamy-card { background: rgba(250, 204, 21, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(250, 204, 21, 0.2); border-radius: 30px; }
+        .gold-btn { background: linear-gradient(135deg, #facc15 0%, #a16207 100%); color: black; font-weight: 800; transition: 0.3s; }
+        .gold-btn:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(250, 204, 21, 0.2); }
+        .notification-bar { background: rgba(250, 204, 21, 0.1); border-bottom: 1px solid rgba(250, 204, 21, 0.3); animation: slideDown 0.5s ease; }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
     </style>
 </head>
-<body class="min-h-screen p-4 flex flex-col items-center">
+<body class="min-h-screen flex flex-col items-center">
 
-    <div id="auth-container" class="w-full max-w-md mt-10 p-8 glass rounded-[2.5rem]">
-        <h1 class="text-3xl font-black text-center mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Wallet Pro</h1>
-        <div class="flex gap-2 mb-6 bg-white/5 p-1 rounded-xl">
-            <button onclick="toggleAuth('login')" class="flex-1 py-2 rounded-lg font-bold bg-blue-600" id="tab-login">Login</button>
-            <button onclick="toggleAuth('signup')" class="flex-1 py-2 rounded-lg font-bold" id="tab-signup">Sign Up</button>
-        </div>
-        <div id="auth-fields" class="space-y-4">
-            <input id="auth-email" type="email" placeholder="ئیمێڵ" class="input-style">
-            <input id="auth-password" type="password" placeholder="پاسۆرد" class="input-style">
-            <div id="signup-only" class="hidden">
-                <input id="auth-name" type="text" placeholder="ناوی تەواو" class="input-style mt-4">
+    <div class="w-full max-w-md flex justify-between p-4 text-[10px] font-bold opacity-70">
+        <div class="flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> ONLINE</div>
+        <div id="live-clock">00:00:00</div>
+    </div>
+
+    <div id="notif-area" class="w-full max-w-md hidden">
+        <div class="notification-bar m-2 p-3 rounded-2xl flex items-center gap-3">
+            <span class="text-xl">🔔</span>
+            <div class="text-xs">
+                <p class="font-black text-yellow-400">نۆتیکەیشنی نوێ</p>
+                <p id="notif-msg" class="text-white opacity-80"></p>
             </div>
-            <button onclick="handleAuth()" class="w-full btn-gradient py-4 rounded-2xl font-bold mt-4 shadow-lg shadow-blue-500/20">بەردەوامبە</button>
-            <button onclick="resetPassword()" class="text-xs text-gray-500 w-full text-center mt-4">پاسۆردم بیرچووە</button>
         </div>
     </div>
 
-    <div id="main-ui" class="w-full max-w-md hidden">
-        <div class="glass p-8 rounded-[2.5rem] mb-6 relative overflow-hidden shadow-2xl border border-white/10">
-            <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-600/20 blur-[50px]"></div>
-            <p id="user-welcome" class="text-gray-400 text-sm">بەخێربێیت</p>
-            <h1 id="balance-iqd" class="text-4xl font-black my-2">0 د.ع</h1>
-            <p id="balance-usd" class="text-green-400 text-xl font-medium opacity-90">$0.00</p>
+    <div id="auth-ui" class="w-full max-w-md mt-10 p-8 dreamy-card text-center mx-4">
+        <h1 class="text-4xl font-black mb-6 text-yellow-400">GOLD WALLET</h1>
+        <div id="auth-form" class="space-y-4">
+            <input id="email" type="email" placeholder="ئیمێڵ" class="w-full p-4 bg-white/5 border border-yellow-500/20 rounded-2xl outline-none focus:border-yellow-500">
+            <input id="password" type="password" placeholder="پاسۆرد" class="w-full p-4 bg-white/5 border border-yellow-500/20 rounded-2xl outline-none focus:border-yellow-500">
+            <div id="signup-fields" class="hidden">
+                <input id="display-name" type="text" placeholder="ناوی تەواو" class="w-full p-4 bg-white/5 border border-yellow-500/20 rounded-2xl mt-4 outline-none">
+            </div>
+            <button onclick="handleAuth()" id="auth-btn" class="w-full gold-btn py-4 rounded-2xl mt-4">چوونەژوورەوە</button>
+            <p onclick="toggleMode()" id="toggle-text" class="text-xs mt-4 opacity-60 cursor-pointer">ئەکاونتم نییە؟ دروستی بکە</p>
+        </div>
+    </div>
+
+    <div id="verify-notice" class="w-full max-w-md mt-10 p-8 dreamy-card text-center hidden mx-4">
+        <h2 class="text-xl font-bold mb-4">ئیمێڵەکەت ڤێریفای بکە 📧</h2>
+        <p class="text-sm opacity-70 mb-6">لینکی چالاککردن بۆ ئیمێڵەکەت نێردراوە. تکایە پاش چالاککردن لاپەڕەکە ڕیفریش بکەرەوە.</p>
+        <button onclick="location.reload()" class="w-full gold-btn py-3 rounded-xl">پاش چالاککردن کلیک لێرە بکە</button>
+    </div>
+
+    <div id="main-ui" class="w-full max-w-md hidden p-4">
+        <div class="dreamy-card p-8 mb-6 relative overflow-hidden shadow-2xl">
+            <p class="text-[10px] uppercase tracking-widest opacity-50">Total Balance</p>
+            <h1 id="bal-iqd" class="text-5xl font-black my-2">0 <span class="text-sm font-light">IQD</span></h1>
+            <p id="bal-usd" class="text-xl opacity-80 text-white font-mono">$0.00</p>
             
             <div class="mt-8">
-                <div class="flex justify-between text-[10px] mb-2 text-gray-400">
-                    <span>ئاستی پاشەکەوت (10M)</span>
-                    <span id="progress-text">0%</span>
+                <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div id="prog-bar" class="h-full bg-yellow-400 transition-all duration-1000" style="width: 0%"></div>
                 </div>
-                <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-purple-600 w-0 transition-all duration-1000"></div>
-                </div>
+                <p id="prog-txt" class="text-[9px] mt-2 opacity-50">Goal Progress: 0%</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <button onclick="openModal('income')" class="glass p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-green-500/10 transition">
-                <span class="text-2xl">💰</span> <span class="text-xs">داهات</span>
-            </button>
-            <button onclick="openModal('expense')" class="glass p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-red-500/10 transition">
-                <span class="text-2xl">🛒</span> <span class="text-xs">مەسرەف</span>
-            </button>
-            <button onclick="openModal('transfer')" class="glass p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-blue-500/10 transition col-span-2">
-                <span class="text-2xl">💸</span> <span class="text-xs">ناردنی پارە (بە ئایدی)</span>
-            </button>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <button onclick="openModal('income')" class="dreamy-card p-4 hover:bg-yellow-500/10 transition">➕ داهات</button>
+            <button onclick="openModal('expense')" class="dreamy-card p-4 hover:bg-red-500/10 transition text-red-400">➖ مەسرەف</button>
+            <button onclick="openModal('transfer')" class="dreamy-card p-4 col-span-2 gold-btn text-black">💸 ناردنی پارە بۆ هاوڕێ</button>
         </div>
 
-        <div class="glass p-6 rounded-[2rem] mb-10">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold">سجلی خەرجییەکان</h3>
-                <span id="my-id" onclick="copyID()" class="text-[9px] text-blue-400 cursor-pointer bg-blue-900/30 px-2 py-1 rounded-lg">ID کۆپی بکە</span>
-            </div>
-            <div id="history-list" class="space-y-4 max-h-80 overflow-y-auto">
-                </div>
+        <div class="dreamy-card p-6 min-h-[300px]">
+            <h3 class="font-bold mb-4 border-b border-yellow-500/20 pb-2">سجلی چالاکییەکان</h3>
+            <div id="history" class="space-y-4 max-h-80 overflow-y-auto pr-2"></div>
         </div>
-        <button onclick="logout()" class="w-full text-red-500 text-sm mb-10">چوونەدەەرەوە</button>
+        
+        <button onclick="firebase.auth().signOut().then(()=>location.reload())" class="w-full mt-6 text-xs opacity-40">Logout Account</button>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-6 z-50">
-        <div class="glass w-full max-w-sm p-8 rounded-[2.5rem] border border-white/20">
-            <h2 id="modal-title" class="text-2xl font-bold mb-6 text-blue-400 text-center"></h2>
-            <div id="modal-fields" class="space-y-4"></div>
-            <div class="flex gap-3 mt-8">
-                <button onclick="closeModal()" class="flex-1 text-gray-400">پاشەکشە</button>
-                <button id="modal-confirm" class="flex-[2] btn-gradient py-3 rounded-xl font-bold">جێبەجێکردن</button>
+    <div id="modal" class="fixed inset-0 bg-black/95 hidden items-center justify-center p-6 z-50">
+        <div class="dreamy-card w-full max-w-sm p-8 border-yellow-500/50">
+            <h2 id="m-title" class="text-xl font-black mb-6 text-yellow-400"></h2>
+            <div id="m-fields" class="space-y-4"></div>
+            <div class="flex gap-3 mt-8 text-sm">
+                <button onclick="closeModal()" class="flex-1 opacity-50">داخستن</button>
+                <button id="m-confirm" class="flex-[2] gold-btn py-3 rounded-xl">تۆمارکردن</button>
             </div>
         </div>
     </div>
@@ -96,28 +102,34 @@
             storageBucket: "hisabat-5b935.appspot.com",
             appId: "1:925180562302:android:7467c500ade5ab5900c12f"
         };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
-        const USD_RATE = 1520;
-        let mode = 'login';
+        let authMode = 'login';
 
-        function toggleAuth(m) {
-            mode = m;
-            document.getElementById('signup-only').classList.toggle('hidden', m !== 'signup');
-            document.getElementById('tab-login').classList.toggle('bg-blue-600', m === 'login');
-            document.getElementById('tab-signup').classList.toggle('bg-blue-600', m === 'signup');
+        // 1. Live Clock
+        setInterval(() => {
+            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('en-GB');
+        }, 1000);
+
+        // 2. Auth Logic
+        function toggleMode() {
+            authMode = authMode === 'login' ? 'signup' : 'login';
+            document.getElementById('signup-fields').classList.toggle('hidden', authMode === 'login');
+            document.getElementById('auth-btn').innerText = authMode === 'login' ? 'چوونەژوورەوە' : 'دروستکردنی ئەکاونت';
+            document.getElementById('toggle-text').innerText = authMode === 'login' ? 'ئەکاونتم نییە؟ دروستی بکە' : 'ئەکاونتم هەیە؟ بچۆ ژوورەوە';
         }
 
         async function handleAuth() {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
-            const name = document.getElementById('auth-name').value;
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const name = document.getElementById('display-name').value;
             try {
-                if (mode === 'signup') {
+                if (authMode === 'signup') {
                     const res = await auth.createUserWithEmailAndPassword(email, pass);
+                    await res.user.sendEmailVerification();
                     await db.ref('users/' + res.user.uid).set({ name: name, balance: 0, email: email });
+                    alert("لینکی چالاککردن بۆ ئیمێڵەکەت نێردرا، تکایە ڤێریفای بکە.");
                 } else {
                     await auth.signInWithEmailAndPassword(email, pass);
                 }
@@ -126,87 +138,100 @@
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('auth-container').classList.add('hidden');
-                document.getElementById('main-ui').classList.remove('hidden');
-                document.getElementById('my-id').innerText = "ID: " + user.uid;
-                loadData(user.uid);
+                if (!user.emailVerified) {
+                    document.getElementById('auth-ui').classList.add('hidden');
+                    document.getElementById('verify-notice').classList.remove('hidden');
+                } else {
+                    document.getElementById('auth-ui').classList.add('hidden');
+                    document.getElementById('verify-notice').classList.add('hidden');
+                    document.getElementById('main-ui').classList.remove('hidden');
+                    loadDashboard(user.uid);
+                }
             }
         });
 
-        function loadData(uid) {
+        // 3. Dashboard Logic
+        function loadDashboard(uid) {
             db.ref('users/' + uid).on('value', snap => {
-                const data = snap.val() || { balance: 0, name: 'بەکارهێنەر' };
-                document.getElementById('user-welcome').innerText = "بەخێربێیت: " + (data.name || 'بەکارهێنەر');
+                const data = snap.val() || { balance: 0 };
                 const bal = data.balance || 0;
-                document.getElementById('balance-iqd').innerText = bal.toLocaleString() + " د.ع";
-                document.getElementById('balance-usd').innerText = "$" + (bal / USD_RATE).toFixed(2);
+                document.getElementById('bal-iqd').innerHTML = bal.toLocaleString() + ' <span class="text-xs opacity-50">IQD</span>';
+                document.getElementById('bal-usd').innerText = "$" + (bal / 1520).toFixed(2);
                 let prog = (bal / 10000000) * 100;
-                document.getElementById('progress-bar').style.width = Math.min(prog, 100) + "%";
-                document.getElementById('progress-text').innerText = Math.floor(Math.min(prog, 100)) + "%";
+                document.getElementById('prog-bar').style.width = Math.min(prog, 100) + "%";
+                document.getElementById('prog-txt').innerText = `Goal Progress: ${Math.floor(prog)}%`;
             });
 
-            db.ref('users/' + uid + '/history').on('value', snap => {
-                const list = document.getElementById('history-list');
+            // Notification Listener
+            db.ref('users/' + uid + '/history').limitToLast(1).on('child_added', snap => {
+                const tx = snap.val();
+                if (tx.amount > 0 && (Date.now() - tx.time < 5000)) {
+                    document.getElementById('notif-area').classList.remove('hidden');
+                    document.getElementById('notif-msg').innerText = `${tx.note} بڕی ${tx.amount.toLocaleString()} بۆت هات!`;
+                    setTimeout(() => document.getElementById('notif-area').classList.add('hidden'), 7000);
+                }
+            });
+
+            db.ref('users/' + uid + '/history').orderByChild('time').on('value', snap => {
+                const list = document.getElementById('history');
                 list.innerHTML = "";
                 snap.forEach(child => {
-                    const item = child.val();
+                    const tx = child.val();
                     list.innerHTML += `
-                        <div class="flex justify-between items-center p-4 rounded-2xl bg-white/5 border-r-4 ${item.amount > 0 ? 'border-green-500' : 'border-red-500'}">
-                            <div><p class="text-sm font-bold">${item.note}</p><p class="text-[10px] text-gray-500">${new Date(item.time).toLocaleString('ku-IQ')}</p></div>
-                            <div class="text-right">
-                                <p class="${item.amount > 0 ? 'text-green-400' : 'text-red-400'} font-bold">${item.amount.toLocaleString()}</p>
-                                <button onclick="deleteTx('${child.key}', ${item.amount})" class="text-[10px] text-gray-600 hover:text-red-400">سڕینەوە</button>
-                            </div>
+                        <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border-l-2 ${tx.amount > 0 ? 'border-yellow-400' : 'border-red-500'}">
+                            <div><p class="text-sm font-bold">${tx.note}</p><p class="text-[9px] opacity-40">${new Date(tx.time).toLocaleTimeString()}</p></div>
+                            <p class="${tx.amount > 0 ? 'text-yellow-400' : 'text-red-400'} font-bold">${tx.amount.toLocaleString()}</p>
                         </div>`;
                 });
             });
         }
 
-        async function processTransaction(type, amount, note, targetId = null) {
-            const uid = auth.currentUser.uid;
-            if (type === 'transfer') {
-                await db.ref('users/' + targetId + '/balance').transaction(b => (b || 0) + amount);
-                await db.ref('users/' + targetId + '/history').push({ note: "پارە هات لەلایەن هاوڕێ", amount: amount, time: Date.now() });
-                await db.ref('users/' + uid + '/balance').transaction(b => (b || 0) - amount);
-                await db.ref('users/' + uid + '/history').push({ note: "ناردنی پارە", amount: -amount, time: Date.now() });
-            } else {
-                const finalAmount = type === 'expense' ? -amount : amount;
-                await db.ref('users/' + uid + '/balance').transaction(b => (b || 0) + finalAmount);
-                await db.ref('users/' + uid + '/history').push({ note: note, amount: finalAmount, time: Date.now() });
-            }
+        // 4. Money Transfer (Fixed & Tested)
+        async function transferMoney(targetId, amount) {
+            const myUid = auth.currentUser.uid;
+            const myEmail = auth.currentUser.email;
+            const amt = parseInt(amount);
+
+            const targetSnap = await db.ref('users/' + targetId).get();
+            if (!targetSnap.exists()) return alert("ئەم ئایدییە بوونی نییە!");
+            
+            // وەرگرتن لە خۆم
+            await db.ref('users/' + myUid + '/balance').transaction(b => (b || 0) - amt);
+            await db.ref('users/' + myUid + '/history').push({ note: `ناردنی پارە بۆ ${targetId.substring(0,5)}`, amount: -amt, time: Date.now() });
+
+            // دانان بۆ ئەو
+            await db.ref('users/' + targetId + '/balance').transaction(b => (b || 0) + amt);
+            await db.ref('users/' + targetId + '/history').push({ note: `پارە هات لە ${myEmail}`, amount: amt, time: Date.now() });
+
+            alert("پارەکە بە سەرکەوتوویی نێردرا!");
             closeModal();
         }
 
-        function deleteTx(key, amount) {
-            if (confirm("دڵنیای لە سڕینەوە؟")) {
-                db.ref('users/' + auth.currentUser.uid + '/history/' + key).remove();
-                db.ref('users/' + auth.currentUser.uid + '/balance').transaction(b => (b || 0) - amount);
-            }
+        async function addEntry(type, amt, note) {
+            const uid = auth.currentUser.uid;
+            const finalAmt = type === 'income' ? parseInt(amt) : -parseInt(amt);
+            await db.ref('users/' + uid + '/balance').transaction(b => (b || 0) + finalAmt);
+            await db.ref('users/' + uid + '/history').push({ note: note, amount: finalAmt, time: Date.now() });
+            closeModal();
         }
 
+        // UI Helpers
         function openModal(mode) {
-            document.getElementById('modal').style.display = 'flex';
-            const fields = document.getElementById('modal-fields');
-            const btn = document.getElementById('modal-confirm');
+            const m = document.getElementById('modal');
+            const f = document.getElementById('m-fields');
+            const btn = document.getElementById('m-confirm');
+            m.style.display = 'flex';
             if (mode === 'transfer') {
-                document.getElementById('modal-title').innerText = "ناردنی پارە";
-                fields.innerHTML = `<input id="v-id" placeholder="ID وەرگر" class="input-style"><input id="v-amount" type="number" placeholder="بڕی پارە" class="input-style">`;
-                btn.onclick = () => processTransaction('transfer', parseInt(document.getElementById('v-amount').value), '', document.getElementById('v-id').value);
+                document.getElementById('m-title').innerText = "💸 ناردنی پارە";
+                f.innerHTML = `<input id="v-id" placeholder="ID وەرگر" class="w-full p-4 bg-white/10 rounded-2xl outline-none border border-yellow-500/20"><input id="v-amt" type="number" placeholder="بڕی پارە" class="w-full p-4 bg-white/10 rounded-2xl border border-yellow-500/20">`;
+                btn.onclick = () => transferMoney(document.getElementById('v-id').value, document.getElementById('v-amt').value);
             } else {
-                document.getElementById('modal-title').innerText = mode === 'income' ? "زیادکردنی داهات" : "تۆمارکردنی خەرجی";
-                fields.innerHTML = `<input id="v-note" placeholder="چی بوو؟" class="input-style"><input id="v-amount" type="number" placeholder="بڕی پارە" class="input-style">`;
-                btn.onclick = () => processTransaction(mode, parseInt(document.getElementById('v-amount').value), document.getElementById('v-note').value);
+                document.getElementById('m-title').innerText = mode === 'income' ? "➕ زیادکردنی داهات" : "➖ تۆمارکردنی خەرجی";
+                f.innerHTML = `<input id="v-note" placeholder="بۆچی؟" class="w-full p-4 bg-white/10 rounded-2xl border border-yellow-500/20"><input id="v-amt" type="number" placeholder="بڕی پارە" class="w-full p-4 bg-white/10 rounded-2xl border border-yellow-500/20">`;
+                btn.onclick = () => addEntry(mode, document.getElementById('v-amt').value, document.getElementById('v-note').value);
             }
         }
-
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function logout() { auth.signOut().then(() => location.reload()); }
-        function copyID() { navigator.clipboard.writeText(auth.currentUser.uid); alert("ID کۆپی کرا!"); }
-        function resetPassword() {
-            const email = document.getElementById('auth-email').value;
-            if (email) auth.sendPasswordResetEmail(email).then(() => alert("لینکی پاسۆرد بۆ ئیمێڵەکەت نێردرا"));
-            else alert("ئیمێڵەکەت بنووسە");
-        }
     </script>
 </body>
 </html>
