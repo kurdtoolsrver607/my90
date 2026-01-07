@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Wallet Pro | جزدانی زیرەک</title>
+    <title>Wallet Pro | جزدانی زیرەک</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -12,53 +12,85 @@
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;500;800&display=swap');
         body { font-family: 'Vazirmatn', sans-serif; background: #0f172a; color: white; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        .input-style { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 15px; width: 100%; outline: none; }
-        .input-style:focus { border-color: #3b82f6; }
+        .btn-gradient { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
+        .input-style { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 15px; width: 100%; outline: none; color: white; }
     </style>
 </head>
 <body class="min-h-screen p-4 flex flex-col items-center">
 
     <div id="auth-container" class="w-full max-w-md mt-10 p-8 glass rounded-[2.5rem]">
         <h1 class="text-3xl font-black text-center mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Wallet Pro</h1>
-        
         <div class="flex gap-2 mb-6 bg-white/5 p-1 rounded-xl">
-            <button onclick="toggleAuth('login')" class="flex-1 py-2 rounded-lg font-bold" id="tab-login">Login</button>
+            <button onclick="toggleAuth('login')" class="flex-1 py-2 rounded-lg font-bold bg-blue-600" id="tab-login">Login</button>
             <button onclick="toggleAuth('signup')" class="flex-1 py-2 rounded-lg font-bold" id="tab-signup">Sign Up</button>
-            <button onclick="toggleAuth('phone')" class="flex-1 py-2 rounded-lg font-bold text-xs" id="tab-phone">Phone</button>
         </div>
-
-        <div id="email-fields" class="space-y-4">
+        <div id="auth-fields" class="space-y-4">
             <input id="auth-email" type="email" placeholder="ئیمێڵ" class="input-style">
             <input id="auth-password" type="password" placeholder="پاسۆرد" class="input-style">
-            <div id="signup-only" class="hidden space-y-4">
-                <input id="auth-name" type="text" placeholder="ناوی تەواو" class="input-style">
-                <input id="auth-pin" type="password" maxlength="4" placeholder="کۆدی PIN (٤ ژمارە)" class="input-style">
+            <div id="signup-only" class="hidden">
+                <input id="auth-name" type="text" placeholder="ناوی تەواو" class="input-style mt-4">
             </div>
-            <button id="main-auth-btn" onclick="handleAuth()" class="w-full bg-blue-600 py-3 rounded-xl font-bold">چوونەژوورەوە</button>
-            <button onclick="resetPassword()" class="text-xs text-gray-500 w-full text-center">پاسۆردم بیرچووە (Reset)</button>
-        </div>
-
-        <div id="phone-fields" class="hidden space-y-4">
-            <div id="recaptcha-container"></div>
-            <input id="phone-number" type="text" placeholder="+964 750 000 0000" class="input-style">
-            <button onclick="sendOTP()" class="w-full bg-green-600 py-3 rounded-xl font-bold">ناردنی کۆد</button>
-            <input id="otp-code" type="text" placeholder="کۆدی نێردراو" class="input-style mt-4">
-            <button onclick="verifyOTP()" class="w-full bg-blue-600 py-3 rounded-xl font-bold">پشتڕاستکردنەوە</button>
+            <button onclick="handleAuth()" class="w-full btn-gradient py-4 rounded-2xl font-bold mt-4 shadow-lg shadow-blue-500/20">بەردەوامبە</button>
+            <button onclick="resetPassword()" class="text-xs text-gray-500 w-full text-center mt-4">پاسۆردم بیرچووە</button>
         </div>
     </div>
 
     <div id="main-ui" class="w-full max-w-md hidden">
-        <div class="glass p-8 rounded-[2.5rem] text-center">
-            <h2 id="user-welcome" class="text-xl font-bold mb-4">بەخێربێیت</h2>
-            <p class="text-gray-400 text-sm mb-4">باڵانسی تۆ:</p>
-            <h1 id="balance-iqd" class="text-4xl font-black text-blue-400">0 د.ع</h1>
-            <button onclick="logout()" class="mt-8 text-red-500 text-sm">چوونەدەەرەوە (Logout)</button>
+        <div class="glass p-8 rounded-[2.5rem] mb-6 relative overflow-hidden shadow-2xl border border-white/10">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-600/20 blur-[50px]"></div>
+            <p id="user-welcome" class="text-gray-400 text-sm">بەخێربێیت</p>
+            <h1 id="balance-iqd" class="text-4xl font-black my-2">0 د.ع</h1>
+            <p id="balance-usd" class="text-green-400 text-xl font-medium opacity-90">$0.00</p>
+            
+            <div class="mt-8">
+                <div class="flex justify-between text-[10px] mb-2 text-gray-400">
+                    <span>ئاستی پاشەکەوت (10M)</span>
+                    <span id="progress-text">0%</span>
+                </div>
+                <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-purple-600 w-0 transition-all duration-1000"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <button onclick="openModal('income')" class="glass p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-green-500/10 transition">
+                <span class="text-2xl">💰</span> <span class="text-xs">داهات</span>
+            </button>
+            <button onclick="openModal('expense')" class="glass p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-red-500/10 transition">
+                <span class="text-2xl">🛒</span> <span class="text-xs">مەسرەف</span>
+            </button>
+            <button onclick="openModal('transfer')" class="glass p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-blue-500/10 transition col-span-2">
+                <span class="text-2xl">💸</span> <span class="text-xs">ناردنی پارە (بە ئایدی)</span>
+            </button>
+        </div>
+
+        <div class="glass p-6 rounded-[2rem] mb-10">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold">سجلی خەرجییەکان</h3>
+                <span id="my-id" onclick="copyID()" class="text-[9px] text-blue-400 cursor-pointer bg-blue-900/30 px-2 py-1 rounded-lg">ID کۆپی بکە</span>
+            </div>
+            <div id="history-list" class="space-y-4 max-h-80 overflow-y-auto">
+                </div>
+        </div>
+        <button onclick="logout()" class="w-full text-red-500 text-sm mb-10">چوونەدەەرەوە</button>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-6 z-50">
+        <div class="glass w-full max-w-sm p-8 rounded-[2.5rem] border border-white/20">
+            <h2 id="modal-title" class="text-2xl font-bold mb-6 text-blue-400 text-center"></h2>
+            <div id="modal-fields" class="space-y-4"></div>
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeModal()" class="flex-1 text-gray-400">پاشەکشە</button>
+                <button id="modal-confirm" class="flex-[2] btn-gradient py-3 rounded-xl font-bold">جێبەجێکردن</button>
+            </div>
         </div>
     </div>
 
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAMbSkztcgeeNgqpgvKf_VnB9Q4MQKomzk",
+            authDomain: "hisabat-5b935.firebaseapp.com",
             databaseURL: "https://hisabat-5b935-default-rtdb.firebaseio.com",
             projectId: "hisabat-5b935",
             storageBucket: "hisabat-5b935.appspot.com",
@@ -68,77 +100,113 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
+        const USD_RATE = 1520;
         let mode = 'login';
 
-        // 1. Toggle UI
         function toggleAuth(m) {
             mode = m;
-            document.getElementById('email-fields').classList.toggle('hidden', m === 'phone');
-            document.getElementById('phone-fields').classList.toggle('hidden', m !== 'phone');
             document.getElementById('signup-only').classList.toggle('hidden', m !== 'signup');
-            document.getElementById('main-auth-btn').innerText = m === 'signup' ? 'دروستکردن' : 'چوونەژوورەوە';
+            document.getElementById('tab-login').classList.toggle('bg-blue-600', m === 'login');
+            document.getElementById('tab-signup').classList.toggle('bg-blue-600', m === 'signup');
         }
 
-        // 2. Email/Password Auth
         async function handleAuth() {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value;
-            const pin = document.getElementById('auth-pin').value;
-
             try {
                 if (mode === 'signup') {
                     const res = await auth.createUserWithEmailAndPassword(email, pass);
-                    await db.ref('users/' + res.user.uid).set({
-                        name: name,
-                        pin: pin,
-                        balance: 0,
-                        email: email
-                    });
-                    alert("ئەکاونت دروستکرا!");
+                    await db.ref('users/' + res.user.uid).set({ name: name, balance: 0, email: email });
                 } else {
                     await auth.signInWithEmailAndPassword(email, pass);
                 }
             } catch (e) { alert(e.message); }
         }
 
-        // 3. Reset Password
-        function resetPassword() {
-            const email = document.getElementById('auth-email').value;
-            if(!email) return alert("تکایە ئیمێڵەکەت بنووسە");
-            auth.sendPasswordResetEmail(email)
-                .then(() => alert("لینکی گۆڕینی پاسۆرد بۆ ئیمێڵەکەت نێردرا"))
-                .catch(e => alert(e.message));
-        }
-
-        // 4. Phone Auth (OTP)
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
-        let confirmationResult = null;
-
-        async function sendOTP() {
-            const phone = document.getElementById('phone-number').value;
-            auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
-                .then(res => { confirmationResult = res; alert("کۆد نێردرا"); })
-                .catch(e => alert(e.message));
-        }
-
-        async function verifyOTP() {
-            const code = document.getElementById('otp-code').value;
-            confirmationResult.confirm(code)
-                .then(() => alert("چوونەژوورەوە سەرکەوتوو بوو"))
-                .catch(e => alert("کۆدەکە هەڵەیە"));
-        }
-
-        // 5. Auth State
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('main-ui').classList.remove('hidden');
-                document.getElementById('user-welcome').innerText = "بەخێربێیت: " + (user.displayName || user.email);
+                document.getElementById('my-id').innerText = "ID: " + user.uid;
+                loadData(user.uid);
             }
         });
 
-        function logout() { auth.signOut(); location.reload(); }
+        function loadData(uid) {
+            db.ref('users/' + uid).on('value', snap => {
+                const data = snap.val() || { balance: 0, name: 'بەکارهێنەر' };
+                document.getElementById('user-welcome').innerText = "بەخێربێیت: " + (data.name || 'بەکارهێنەر');
+                const bal = data.balance || 0;
+                document.getElementById('balance-iqd').innerText = bal.toLocaleString() + " د.ع";
+                document.getElementById('balance-usd').innerText = "$" + (bal / USD_RATE).toFixed(2);
+                let prog = (bal / 10000000) * 100;
+                document.getElementById('progress-bar').style.width = Math.min(prog, 100) + "%";
+                document.getElementById('progress-text').innerText = Math.floor(Math.min(prog, 100)) + "%";
+            });
+
+            db.ref('users/' + uid + '/history').on('value', snap => {
+                const list = document.getElementById('history-list');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const item = child.val();
+                    list.innerHTML += `
+                        <div class="flex justify-between items-center p-4 rounded-2xl bg-white/5 border-r-4 ${item.amount > 0 ? 'border-green-500' : 'border-red-500'}">
+                            <div><p class="text-sm font-bold">${item.note}</p><p class="text-[10px] text-gray-500">${new Date(item.time).toLocaleString('ku-IQ')}</p></div>
+                            <div class="text-right">
+                                <p class="${item.amount > 0 ? 'text-green-400' : 'text-red-400'} font-bold">${item.amount.toLocaleString()}</p>
+                                <button onclick="deleteTx('${child.key}', ${item.amount})" class="text-[10px] text-gray-600 hover:text-red-400">سڕینەوە</button>
+                            </div>
+                        </div>`;
+                });
+            });
+        }
+
+        async function processTransaction(type, amount, note, targetId = null) {
+            const uid = auth.currentUser.uid;
+            if (type === 'transfer') {
+                await db.ref('users/' + targetId + '/balance').transaction(b => (b || 0) + amount);
+                await db.ref('users/' + targetId + '/history').push({ note: "پارە هات لەلایەن هاوڕێ", amount: amount, time: Date.now() });
+                await db.ref('users/' + uid + '/balance').transaction(b => (b || 0) - amount);
+                await db.ref('users/' + uid + '/history').push({ note: "ناردنی پارە", amount: -amount, time: Date.now() });
+            } else {
+                const finalAmount = type === 'expense' ? -amount : amount;
+                await db.ref('users/' + uid + '/balance').transaction(b => (b || 0) + finalAmount);
+                await db.ref('users/' + uid + '/history').push({ note: note, amount: finalAmount, time: Date.now() });
+            }
+            closeModal();
+        }
+
+        function deleteTx(key, amount) {
+            if (confirm("دڵنیای لە سڕینەوە؟")) {
+                db.ref('users/' + auth.currentUser.uid + '/history/' + key).remove();
+                db.ref('users/' + auth.currentUser.uid + '/balance').transaction(b => (b || 0) - amount);
+            }
+        }
+
+        function openModal(mode) {
+            document.getElementById('modal').style.display = 'flex';
+            const fields = document.getElementById('modal-fields');
+            const btn = document.getElementById('modal-confirm');
+            if (mode === 'transfer') {
+                document.getElementById('modal-title').innerText = "ناردنی پارە";
+                fields.innerHTML = `<input id="v-id" placeholder="ID وەرگر" class="input-style"><input id="v-amount" type="number" placeholder="بڕی پارە" class="input-style">`;
+                btn.onclick = () => processTransaction('transfer', parseInt(document.getElementById('v-amount').value), '', document.getElementById('v-id').value);
+            } else {
+                document.getElementById('modal-title').innerText = mode === 'income' ? "زیادکردنی داهات" : "تۆمارکردنی خەرجی";
+                fields.innerHTML = `<input id="v-note" placeholder="چی بوو؟" class="input-style"><input id="v-amount" type="number" placeholder="بڕی پارە" class="input-style">`;
+                btn.onclick = () => processTransaction(mode, parseInt(document.getElementById('v-amount').value), document.getElementById('v-note').value);
+            }
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function logout() { auth.signOut().then(() => location.reload()); }
+        function copyID() { navigator.clipboard.writeText(auth.currentUser.uid); alert("ID کۆپی کرا!"); }
+        function resetPassword() {
+            const email = document.getElementById('auth-email').value;
+            if (email) auth.sendPasswordResetEmail(email).then(() => alert("لینکی پاسۆرد بۆ ئیمێڵەکەت نێردرا"));
+            else alert("ئیمێڵەکەت بنووسە");
+        }
     </script>
 </body>
 </html>
