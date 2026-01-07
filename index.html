@@ -1,79 +1,92 @@
+
 <!DOCTYPE html>
 <html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Wallet Pro</title>
+    <title>Wallet Pro | جزدانی زیرەک</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;500;800&display=swap');
-        body { font-family: 'Vazirmatn', sans-serif; background: #0f172a; color: white; }
-        .dreamy-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        .progress-bar { transition: width 0.5s ease-in-out; }
+        body { font-family: 'Vazirmatn', sans-serif; background: #0f172a; color: white; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-gradient { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
     </style>
 </head>
-<body class="min-h-screen p-4">
+<body class="min-h-screen flex flex-col items-center justify-start p-4">
 
-    <div id="auth-ui" class="max-w-md mx-auto mt-20 p-8 dreamy-card rounded-[2rem] text-center">
-        <h1 class="text-3xl font-black mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Wallet Pro</h1>
-        <button onclick="loginWithGoogle()" class="w-full bg-white text-black p-4 rounded-2xl font-bold flex items-center justify-center gap-2">
-            <img src="https://www.google.com/favicon.ico" class="w-5"> چوونەژوورەوە بە جیمەیڵ
+    <div id="login-ui" class="w-full max-w-md mt-20 p-8 glass rounded-[2.5rem] text-center">
+        <h1 class="text-4xl font-black mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Wallet Pro</h1>
+        <p class="text-gray-400 mb-8 text-sm">بەخێربێیت بۆ پارێزراوترین جزدان</p>
+        <button onclick="login()" class="w-full bg-white text-black py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-lg hover:scale-105 transition">
+            <img src="https://www.google.com/favicon.ico" class="w-5"> چوونەژوورەوە بە Google
         </button>
     </div>
 
-    <div id="main-ui" class="max-w-md mx-auto hidden">
-        <div class="dreamy-card p-6 rounded-[2.5rem] mb-6 shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 blur-3xl"></div>
-            <p class="text-sm opacity-60">کۆی گشتی باڵانس</p>
-            <h2 id="iqd-balance" class="text-3xl font-black mt-1">0 د.ع</h2>
-            <p id="usd-balance" class="text-xl text-green-400 font-medium">$0.00</p>
+    <div id="pin-ui" class="w-full max-w-md mt-20 p-8 glass rounded-[2.5rem] text-center hidden">
+        <h2 class="text-2xl font-bold mb-4">کۆدی نهێنی PIN</h2>
+        <p class="text-gray-400 mb-6">بۆ چوونەژوورەوە کۆدەکەت لێ بدە</p>
+        <input id="pin-input" type="password" maxlength="4" placeholder="****" class="bg-white/10 text-white text-center text-3xl tracking-widest p-4 rounded-2xl w-32 outline-none border border-blue-500/50">
+        <button onclick="verifyPin()" class="w-full btn-gradient mt-6 py-4 rounded-2xl font-bold">پشتڕاستکردنەوە</button>
+    </div>
+
+    <div id="main-ui" class="w-full max-w-md hidden">
+        <div class="glass p-8 rounded-[2.5rem] mb-6 relative overflow-hidden shadow-2xl">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-purple-600/20 blur-[50px]"></div>
+            <p class="text-gray-400 text-sm">کۆی گشتی باڵانس</p>
+            <h1 id="balance-iqd" class="text-4xl font-black my-2">0 د.ع</h1>
+            <p id="balance-usd" class="text-green-400 text-xl font-medium opacity-90">$0.00</p>
             
-            <div class="mt-6">
-                <div class="flex justify-between text-xs mb-1 opacity-50">
-                    <span>ئاستی پاشەکەوت</span>
-                    <span id="progress-percent">0%</span>
+            <div class="mt-8">
+                <div class="flex justify-between text-[10px] mb-2 text-gray-400">
+                    <span>ئامانجی پاشەکەوت (10M)</span>
+                    <span id="progress-text">0%</span>
                 </div>
-                <div class="w-full h-2 bg-gray-800 rounded-full">
-                    <div id="progress-fill" class="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full progress-bar" style="width: 0%"></div>
+                <div class="w-full h-2.5 bg-gray-800 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-purple-600 w-0 transition-all duration-1000"></div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-6 text-sm">
-            <button onclick="showModal('add')" class="dreamy-card p-4 rounded-2xl hover:bg-white/10 transition">➕ زیاکردن</button>
-            <button onclick="showModal('transfer')" class="dreamy-card p-4 rounded-2xl hover:bg-white/10 transition">💸 ناردنی پارە</button>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <button onclick="openModal('income')" class="glass p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-green-500/10 transition">
+                <span class="text-2xl">💰</span> <span class="text-xs">داهات</span>
+            </button>
+            <button onclick="openModal('expense')" class="glass p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-red-500/10 transition">
+                <span class="text-2xl">🛒</span> <span class="text-xs">مەسرەف</span>
+            </button>
+            <button onclick="openModal('transfer')" class="glass p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-blue-500/10 transition col-span-2">
+                <span class="text-2xl">💸</span> <span class="text-xs">ناردنی پارە بۆ هاوڕێ (بە ID)</span>
+            </button>
         </div>
 
-        <div class="dreamy-card p-6 rounded-[2rem]">
-            <h3 class="font-bold mb-4 flex justify-between">
-                <span>سجلی کارەکان</span>
-                <span id="user-id-display" class="text-[10px] opacity-40">ID: ...</span>
-            </h3>
-            <div id="history-list" class="space-y-4 max-h-96 overflow-y-auto pr-2">
+        <div class="glass p-6 rounded-[2rem] mb-20">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold">دوایین چالاکییەکان</h3>
+                <span id="my-id" class="text-[9px] text-gray-500 bg-gray-900 px-2 py-1 rounded-lg">ID: ...</span>
+            </div>
+            <div id="history-list" class="space-y-4 max-h-80 overflow-y-auto pr-1">
                 </div>
         </div>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-6 z-50">
-        <div class="dreamy-card w-full max-w-sm p-6 rounded-[2rem]">
-            <h2 id="modal-title" class="text-xl font-bold mb-4 text-blue-400"></h2>
-            <div id="modal-content" class="space-y-4 text-black">
-                </div>
-            <div class="flex gap-2 mt-6">
-                <button onclick="closeModal()" class="flex-1 text-white opacity-50">پاشەکشە</button>
-                <button id="modal-submit" class="flex-1 bg-blue-600 text-white p-3 rounded-xl">جێبەجێکردن</button>
+    <div id="modal" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-6 z-50">
+        <div class="glass w-full max-w-sm p-8 rounded-[2.5rem]">
+            <h2 id="modal-title" class="text-2xl font-bold mb-6 text-blue-400 text-center"></h2>
+            <div id="modal-fields" class="space-y-4"></div>
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeModal()" class="flex-1 text-gray-400 text-sm">پاشەکشە</button>
+                <button id="modal-confirm" class="flex-[2] btn-gradient py-3 rounded-xl font-bold shadow-lg">جێبەجێکردن</button>
             </div>
         </div>
     </div>
 
     <script>
-        // زانیارییەکانی Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAMbSkztcgeeNgqpgvKf_VnB9Q4MQKomzk",
-            authDomain: "hisabat-5b935.firebaseapp.com",
             databaseURL: "https://hisabat-5b935-default-rtdb.firebaseio.com",
             projectId: "hisabat-5b935",
             storageBucket: "hisabat-5b935.appspot.com",
@@ -82,126 +95,115 @@
 
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const db = firebase.firestore();
-        let userUID = "";
-        const USD_RATE = 1520; // نرخی دۆلاری ئەمڕۆ
+        const db = firebase.database();
+        const USD_RATE = 1520;
+        let currentUser = null;
 
-        // 1. Login with Google
-        function loginWithGoogle() {
+        // --- AUTH LOGIC ---
+        function login() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
+            auth.signInWithPopup(provider).catch(err => alert("هەڵە: " + err.message));
         }
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                userUID = user.uid;
-                document.getElementById('auth-ui').classList.add('hidden');
-                document.getElementById('main-ui').classList.remove('hidden');
-                document.getElementById('user-id-display').innerText = "ID: " + user.uid.substring(0,8);
-                initUserDoc();
-                syncData();
+                currentUser = user;
+                document.getElementById('login-ui').classList.add('hidden');
+                document.getElementById('pin-ui').classList.remove('hidden');
+                document.getElementById('my-id').innerText = "ID: " + user.uid.substring(0, 10);
             }
         });
 
-        // 2. Initialize User in Firestore
-        async function initUserDoc() {
-            const userRef = db.collection('users').doc(userUID);
-            const doc = await userRef.get();
-            if (!doc.exists) {
-                await userRef.set({ balance: 0, email: auth.currentUser.email });
+        function verifyPin() {
+            const pin = document.getElementById('pin-input').value;
+            if (pin === "1234") { // کۆدی دیفۆڵت - دەتوانیت بیگۆڕیت
+                document.getElementById('pin-ui').classList.add('hidden');
+                document.getElementById('main-ui').classList.remove('hidden');
+                loadData();
+            } else {
+                alert("کۆدی PIN هەڵەیە!");
             }
         }
 
-        // 3. Sync Balance and History
-        function syncData() {
-            db.collection('users').doc(userUID).onSnapshot(doc => {
-                const balance = doc.data().balance || 0;
-                document.getElementById('iqd-balance').innerText = balance.toLocaleString() + " د.ع";
-                document.getElementById('usd-balance').innerText = "$" + (balance / USD_RATE).toFixed(2);
+        // --- DATA LOGIC ---
+        function loadData() {
+            const userPath = `users/${currentUser.uid}`;
+            db.ref(userPath).on('value', snap => {
+                const data = snap.val() || { balance: 0 };
+                const bal = data.balance || 0;
+                document.getElementById('balance-iqd').innerText = bal.toLocaleString() + " د.ع";
+                document.getElementById('balance-usd').innerText = "$" + (bal / USD_RATE).toFixed(2);
                 
-                // Progress bar (Target: 10,000,000)
-                const percent = Math.min((balance / 10000000) * 100, 100);
-                document.getElementById('progress-fill').style.width = percent + "%";
-                document.getElementById('progress-percent').innerText = Math.floor(percent) + "%";
+                let prog = (bal / 10000000) * 100;
+                document.getElementById('progress-bar').style.width = Math.min(prog, 100) + "%";
+                document.getElementById('progress-text').innerText = Math.floor(Math.min(prog, 100)) + "%";
             });
 
-            db.collection('users').doc(userUID).collection('tx').orderBy('time', 'desc').onSnapshot(snap => {
+            db.ref(`${userPath}/history`).orderByChild('time').limitToLast(20).on('value', snap => {
                 const list = document.getElementById('history-list');
                 list.innerHTML = "";
-                snap.forEach(doc => {
-                    const data = doc.data();
+                snap.forEach(child => {
+                    const item = child.val();
                     list.innerHTML += `
-                        <div class="flex justify-between items-center p-3 rounded-2xl bg-white/5 border-r-2 ${data.amount > 0 ? 'border-green-500' : 'border-red-500'}">
+                        <div class="flex justify-between items-center p-4 rounded-2xl bg-white/5 border-l-4 ${item.amount > 0 ? 'border-green-500' : 'border-red-500'}">
                             <div>
-                                <p class="text-sm font-bold">${data.note}</p>
-                                <p class="text-[10px] opacity-40">${new Date(data.time).toLocaleString()}</p>
+                                <p class="text-sm font-medium">${item.note}</p>
+                                <p class="text-[9px] text-gray-500">${new Date(item.time).toLocaleString('ku-IQ')}</p>
                             </div>
                             <div class="text-right">
-                                <p class="${data.amount > 0 ? 'text-green-400' : 'text-red-400'}">${data.amount.toLocaleString()}</p>
-                                <button onclick="deleteTx('${doc.id}', ${data.amount})" class="text-[10px] text-gray-500">سڕینەوە</button>
+                                <p class="font-bold ${item.amount > 0 ? 'text-green-400' : 'text-red-400'}">${item.amount.toLocaleString()}</p>
+                                <button onclick="deleteTx('${child.key}', ${item.amount})" class="text-[9px] text-gray-600 hover:text-red-400 transition">سڕینەوە</button>
                             </div>
                         </div>`;
                 });
             });
         }
 
-        // 4. Add Transaction
-        async function addAmount(type) {
-            const amount = parseInt(document.getElementById('m-amount').value);
-            const note = document.getElementById('m-note').value;
-            const finalAmount = type === 'exp' ? -amount : amount;
+        async function processTransaction(type, amount, note, targetId = null) {
+            const finalAmount = type === 'expense' ? -Math.abs(amount) : Math.abs(amount);
+            const myPath = `users/${currentUser.uid}`;
 
-            await db.collection('users').doc(userUID).collection('tx').add({
-                amount: finalAmount, note: note, time: Date.now()
-            });
-            await db.collection('users').doc(userUID).update({
-                balance: firebase.firestore.FieldValue.increment(finalAmount)
-            });
-            closeModal();
-        }
-
-        // 5. Delete Transaction (Correcting mistakes)
-        async function deleteTx(id, amount) {
-            if(confirm("دڵنیای لە سڕینەوە؟")) {
-                await db.collection('users').doc(userUID).collection('tx').doc(id).delete();
-                await db.collection('users').doc(userUID).update({
-                    balance: firebase.firestore.FieldValue.increment(-amount)
-                });
-            }
-        }
-
-        // 6. Transfer Money to ID
-        async function transferMoney() {
-            const targetID = document.getElementById('m-id').value;
-            const amount = parseInt(document.getElementById('m-amount').value);
-            
-            // Logic: 1. Subtract from me, 2. Add to target
-            // In real app, use Firebase Functions for safety
-            await db.collection('users').doc(userUID).update({ balance: firebase.firestore.FieldValue.increment(-amount) });
-            await db.collection('users').doc(targetID).update({ balance: firebase.firestore.FieldValue.increment(amount) });
-            
-            alert("پارەکە بە سەرکەوتوویی ناردرا!");
-            closeModal();
-        }
-
-        // UI Helpers
-        function showModal(mode) {
-            const m = document.getElementById('modal');
-            const cont = document.getElementById('modal-content');
-            const btn = document.getElementById('modal-submit');
-            m.classList.remove('hidden');
-            
-            if(mode === 'add') {
-                document.getElementById('modal-title').innerText = "داخڵکردنی پارە";
-                cont.innerHTML = `<input id="m-note" placeholder="بۆچی؟" class="w-full p-3 rounded-xl"><input id="m-amount" type="number" placeholder="بڕی پارە" class="w-full p-3 rounded-xl">`;
-                btn.onclick = () => addAmount('inc');
+            if (type === 'transfer') {
+                // ناردنی پارە بۆ هاوڕێ
+                await db.ref(`users/${targetId}/balance`).transaction(b => (b || 0) + amount);
+                await db.ref(`users/${targetId}/history`).push({ note: `پارە هات لەلایەن ${currentUser.displayName}`, amount: amount, time: Date.now() });
+                
+                // کەمکردن لە خۆم
+                await db.ref(`${myPath}/balance`).transaction(b => (b || 0) - amount);
+                await db.ref(`${myPath}/history`).push({ note: `ناردنی پارە بۆ ID: ${targetId.substring(0,5)}`, amount: -amount, time: Date.now() });
             } else {
-                document.getElementById('modal-title').innerText = "ناردن بۆ هاوڕێ";
-                cont.innerHTML = `<input id="m-id" placeholder="ID ی وەرگر" class="w-full p-3 rounded-xl"><input id="m-amount" type="number" placeholder="بڕی پارە" class="w-full p-3 rounded-xl">`;
-                btn.onclick = transferMoney;
+                await db.ref(`${myPath}/balance`).transaction(b => (b || 0) + finalAmount);
+                await db.ref(`${myPath}/history`).push({ note: note, amount: finalAmount, time: Date.now() });
+            }
+            closeModal();
+        }
+
+        function deleteTx(key, amount) {
+            if (confirm("ئایا دڵنیای لە سڕینەوەی ئەم هەڵەیە؟")) {
+                db.ref(`users/${currentUser.uid}/history/${key}`).remove();
+                db.ref(`users/${currentUser.uid}/balance`).transaction(b => (b || 0) - amount);
             }
         }
-        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+        // --- UI HELPERS ---
+        function openModal(mode) {
+            const m = document.getElementById('modal');
+            const fields = document.getElementById('modal-fields');
+            const btn = document.getElementById('modal-confirm');
+            m.style.display = 'flex';
+
+            if (mode === 'transfer') {
+                document.getElementById('modal-title').innerText = "ناردن بۆ هاوڕێ";
+                fields.innerHTML = `<input id="val-id" placeholder="ID ی وەرگر" class="w-full p-4 rounded-xl bg-white/10 outline-none border border-white/10 focus:border-blue-500"><input id="val-amount" type="number" placeholder="بڕی پارە" class="w-full p-4 rounded-xl bg-white/10 outline-none border border-white/10">`;
+                btn.onclick = () => processTransaction('transfer', parseInt(document.getElementById('val-amount').value), '', document.getElementById('val-id').value);
+            } else {
+                document.getElementById('modal-title').innerText = mode === 'income' ? "زیادکردنی داهات" : "تۆمارکردنی مەسرەف";
+                fields.innerHTML = `<input id="val-note" placeholder="چی بوو؟ (نمونە: تەماتە)" class="w-full p-4 rounded-xl bg-white/10 outline-none border border-white/10 focus:border-blue-500"><input id="val-amount" type="number" placeholder="بڕی پارە" class="w-full p-4 rounded-xl bg-white/10 outline-none border border-white/10">`;
+                btn.onclick = () => processTransaction(mode, parseInt(document.getElementById('val-amount').value), document.getElementById('val-note').value);
+            }
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
     </script>
 </body>
 </html>
